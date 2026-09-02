@@ -971,45 +971,56 @@ function setupSidebar() {
 
         navs.forEach(nav => {
             nav.querySelectorAll('a').forEach(function(link) {
-            if (!link.dataset.ffDone) {
-                var text = "";
-                Array.from(link.childNodes).forEach(node => {
-                    if (node.nodeType === 3 && node.textContent.trim()) {
-                        text = node.textContent.trim();
-                    } else if (node.nodeType === 1 && !node.classList.contains('ff-ico') && !node.classList.contains('ff-txt-wrap')) {
-                        var t = node.textContent.trim();
-                        if (t) text = t;
+                var hasIco = link.querySelector('.ff-ico');
+                var hasTxt = link.querySelector('.ff-txt-wrap');
+
+                if (link.dataset.ffDone && (!hasIco || !hasTxt)) {
+                    delete link.dataset.ffDone;
+                }
+
+                if (!link.dataset.ffDone) {
+                    var text = "";
+                    Array.from(link.childNodes).forEach(node => {
+                        if (node.nodeType === 3 && node.textContent.trim()) {
+                            text = node.textContent.trim();
+                        } else if (node.nodeType === 1 && !node.classList.contains('ff-ico') && !node.classList.contains('ff-txt-wrap')) {
+                            var t = node.textContent.trim();
+                            if (t) text = t;
+                        }
+                    });
+
+                    if (!text) return; // Not ready yet, retry on next tick
+
+                    link.dataset.ffDone = '1';
+                    var href = (link.getAttribute('href') || '').toLowerCase();
+                    var iconHtml = null;
+                    var keys = Object.keys(pathIcons).sort((a,b) => b.length - a.length);
+                    for (var k of keys) { if (href.includes('/'+k) || href.endsWith(k) || (href.includes(k) && k.length > 3)) { iconHtml = pathIcons[k]; break; } }
+                    if (!iconHtml && /\/server\/[a-zA-Z0-9-]+\/?$/.test(href)) iconHtml = pathIcons['console'];
+                    if (!iconHtml) iconHtml = fallbackIcon;
+
+                    Array.from(link.childNodes).forEach(node => {
+                        if (node.nodeType === 3) {
+                            link.removeChild(node);
+                        } else if (node.nodeType === 1 && !node.classList.contains('ff-ico') && !node.classList.contains('ff-txt-wrap')) {
+                            node.style.setProperty('display', 'none', 'important');
+                        }
+                    });
+
+                    if (!hasIco) {
+                        var icoSpan = document.createElement('span'); icoSpan.className = 'ff-ico'; icoSpan.innerHTML = iconHtml;
+                        link.appendChild(icoSpan);
                     }
-                });
-
-                if (!text) return; // Not ready yet, retry on next tick
-
-                link.dataset.ffDone = '1';
-                var href = (link.getAttribute('href') || '').toLowerCase();
-                var iconHtml = null;
-                var keys = Object.keys(pathIcons).sort((a,b) => b.length - a.length);
-                for (var k of keys) { if (href.includes('/'+k) || href.endsWith(k) || (href.includes(k) && k.length > 3)) { iconHtml = pathIcons[k]; break; } }
-                if (!iconHtml && /\/server\/[a-zA-Z0-9-]+\/?$/.test(href)) iconHtml = pathIcons['console'];
-                if (!iconHtml) iconHtml = fallbackIcon;
-
-                Array.from(link.childNodes).forEach(node => {
-                    if (node.nodeType === 3) {
-                        link.removeChild(node);
-                    } else if (node.nodeType === 1 && !node.classList.contains('ff-ico')) {
-                        node.style.setProperty('display', 'none', 'important');
+                    if (!hasTxt) {
+                        var wrap = document.createElement('span'); wrap.className = 'ff-txt-wrap';
+                        var txt = document.createElement('span'); txt.className = 'ff-txt'; txt.textContent = text;
+                        wrap.appendChild(txt); link.appendChild(wrap);
                     }
-                });
-
-                var icoSpan = document.createElement('span'); icoSpan.className = 'ff-ico'; icoSpan.innerHTML = iconHtml;
-                link.appendChild(icoSpan);
-                var wrap = document.createElement('span'); wrap.className = 'ff-txt-wrap';
-                var txt = document.createElement('span'); txt.className = 'ff-txt'; txt.textContent = text;
-                wrap.appendChild(txt); link.appendChild(wrap);
-            }
-            var h = link.getAttribute('href');
-            var active = (h === location.pathname || h === location.pathname + '/');
-            if (!active && h !== '/' && location.pathname.startsWith(h) && h.split('/').length > 3) active = true;
-            link.classList.toggle('active', active);
+                }
+                var h = link.getAttribute('href');
+                var active = (h === location.pathname || h === location.pathname + '/');
+                if (!active && h !== '/' && location.pathname.startsWith(h) && h.split('/').length > 3) active = true;
+                link.classList.toggle('active', active);
             });
         });
     }
@@ -1188,12 +1199,16 @@ function runCommand(cmd) {
             window._ffInitAnimDone = false;
             window._ffInitialDashAnimDone = false;
         }
-        if (sig || location.href !== lastUrl) {
+        var isNav = (location.href !== lastUrl);
+        if (isNav) {
+            lastUrl = location.href;
+            triggerUpdate();
+            [50, 150, 300, 600, 1000].forEach(delay => setTimeout(triggerUpdate, delay));
+        } else if (sig) {
             if (_ffObsTimer) clearTimeout(_ffObsTimer);
             _ffObsTimer = setTimeout(() => {
-                lastUrl = location.href;
                 triggerUpdate();
-            }, 250);
+            }, 100);
         }
     });
     if (document.body) obs.observe(document.body, { childList: true, subtree: true });
