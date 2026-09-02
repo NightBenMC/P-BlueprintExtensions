@@ -2,10 +2,8 @@
     $settings = app()->make('Pterodactyl\Contracts\Repository\SettingsRepositoryInterface');
     $blueprint = app()->make('Pterodactyl\BlueprintFramework\Libraries\ExtensionLibrary\Client\BlueprintClientLibrary', ['settings' => $settings]);
 
-    $animSpeedRaw = floatval($blueprint->dbGet('fileflow', 'anim_speed') ?? '0.04');
-    $animStaggerRaw = floatval($blueprint->dbGet('fileflow', 'anim_stagger') ?? '0.005');
-    $animSpeed = number_format($animSpeedRaw / 2, 4);
-    $animStagger = number_format($animStaggerRaw / 2, 4);
+    $animSpeed = $blueprint->dbGet('fileflow', 'anim_speed') ?? '0.04';
+    $animStagger = $blueprint->dbGet('fileflow', 'anim_stagger') ?? '0.005';
     $rowGap = $blueprint->dbGet('fileflow', 'row_gap') ?? '6';
     $fileDepth = $blueprint->dbGet('fileflow', 'max_depth') ?? '10';
     $skipShortcut = $blueprint->dbGet('fileflow', 'skip_shortcut') ?? 'x';
