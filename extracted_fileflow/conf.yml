@@ -1,0 +1,37 @@
+info:
+  name: "FileFlow"
+  identifier: "fileflow"
+  description: "Enhanced file manager with graphical tree view, staggered loading animations, responsive sidebar navigation (desktop) / fixed scrollable nav (mobile), and secure user registration."
+  flags: ""
+  version: "1.2.1"
+  target: "beta-2024-12"
+  author: "Devin"
+  icon: "icon.png"
+  website: ""
+
+admin:
+  view: "admin/view.blade.php"
+  controller: "admin/controller.php"
+  css: ""
+  wrapper: ""
+
+dashboard:
+  css: "fileflow.css"
+  wrapper: "wrapper.blade.php"
+  components: "components"
+
+data:
+  directory: ""
+  public: ""
+  console: ""
+
+requests:
+  views: ""
+  app: "app"
+  routers:
+    application: ""
+    client: "routers.php"
+    web: "routes/web.php"
+
+database:
+  migrations: "database/migrations"

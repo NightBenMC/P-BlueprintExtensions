@@ -1,0 +1,55 @@
+/* ============================================
+   FileFlow - Navigation & Mobile Customization
+   ============================================ */
+
+:root {
+    --fileflow-anim-speed: 0.10s;
+    --fileflow-anim-stagger: 0.01s;
+    --fileflow-row-gap: 6px;
+}
+
+/* ============================================
+   Keyframe definitions
+   ============================================ */
+@keyframes fileflow-fadeIn {
+    0% { opacity: 0; transform: translateY(-12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Respect reduced motion preference
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *[data-ff-animated] {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+/* ============================================
+   Mobile: icons/images next to text entries
+   ============================================ */
+@media (max-width: 768px) {
+    .ff-ico {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-right: 8px !important;
+        width: 24px !important;
+        height: 24px !important;
+        flex-shrink: 0 !important;
+    }
+    .ff-ico svg, .ff-ico img {
+        width: 20px !important;
+        height: 20px !important;
+        object-fit: contain !important;
+    }
+    .ff-txt-wrap {
+        opacity: 1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+    .ff-txt { opacity: 1 !important; }
+}
